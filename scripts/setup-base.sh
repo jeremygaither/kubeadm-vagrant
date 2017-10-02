@@ -1,5 +1,6 @@
 #!/bin/bash -eux
 
+export KUBE_VERSION="1.7.5-00"
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
@@ -17,4 +18,4 @@ deb http://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 
 apt-get update
-apt-get install -yq kubelet kubeadm kubectl
+apt-get install -yq kubelet=$KUBE_VERSION kubeadm=$KUBE_VERSION kubectl=$KUBE_VERSION
