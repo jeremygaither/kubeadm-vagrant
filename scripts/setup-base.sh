@@ -1,3 +1,3 @@
 #!/bin/bash -eux
 
-sudo apt install ebtables ethtool
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq ebtables ethtool
