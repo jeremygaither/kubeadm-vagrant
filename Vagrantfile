@@ -24,21 +24,21 @@ Vagrant.configure('2') do |config|
       master.vm.network 'private_network', ip: master_ip
 
       master.vm.provider 'virtualbox' do |vb|
-        vb.memory = '1024'
+        vb.memory = 2048
+        vb.cpus = 2
       end
 
       master.vm.provision 'shell', inline: "echo 127.0.0.1 #{master_name} >>/etc/hosts"
+      master.vm.provision 'shell', inline: "echo #{master_ip} #{master_name} >>/etc/hosts"
       master.vm.provision 'shell', inline: "echo #{master_name} >/etc/hostname"
       master.vm.provision 'shell', inline: "hostname #{master_name}"
 
       master.vm.provision 'shell', path: 'scripts/setup-base.sh'
 
       master.vm.provision 'shell' do |s|
-        s.args = [master_ip]
+        s.args = [master_ip, cluster_init_token]
         s.path = 'scripts/setup-master.sh'
       end
-
-      master.vm.provision 'shell', inline: "kubeadm token create #{cluster_init_token}"
     end
   end
 
@@ -48,19 +48,22 @@ Vagrant.configure('2') do |config|
       node.vm.box = DEFAULT_BOX
 
       node_address = 10 + node_number
-      node.vm.network 'private_network', ip: "192.168.50.#{node_address}"
+      node_ip = "192.168.50.#{node_address}"
+      node.vm.network 'private_network', ip: node_ip
 
       node.vm.provider 'virtualbox' do |vb|
-        vb.memory = '1024'
+        vb.memory = 1024
+        vb.cpus = 2
       end
 
       node.vm.provision 'shell', inline: "echo 127.0.0.1 #{node_name} >>/etc/hosts"
+      node.vm.provision 'shell', inline: "echo #{node_ip} #{node_name} >>/etc/hosts"
       node.vm.provision 'shell', inline: "echo #{node_name} >/etc/hostname"
       node.vm.provision 'shell', inline: "hostname #{node_name}"
 
       node.vm.provision 'shell', path: 'scripts/setup-base.sh'
 
-      node.vm.provision 'shell', inline: "kubeadm join --token #{cluster_init_token} #{first_master}:6443"
+      node.vm.provision 'shell', inline: "kubeadm join --skip-preflight-checks --token #{cluster_init_token} #{first_master}:6443"
     end
   end
 end
